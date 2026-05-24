@@ -11,7 +11,7 @@ import {
   type OverlayHandle,
   type TUI,
 } from "@earendil-works/pi-tui";
-import { renderCavemanIndicator } from "./caveman.ts";
+import { renderCavemanIndicator } from "./caveman";
 
 type PromptState = {
   text: string;
