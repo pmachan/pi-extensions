@@ -13,7 +13,8 @@
   },
   "pi": {
     "extensions": [
-      "./extensions/caveman/index.ts"
+      "./extensions/caveman/index.ts",
+      "./extensions/model-dialog/index.ts"
     ]
   },
   "themes": [
