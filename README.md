@@ -8,7 +8,8 @@ Personal [pi](https://github.com/earendil-works/pi-coding-agent) extensions and 
 |-----------|-------------|
 | **caveman** | Toggle caveman mode — terse responses, fewer tokens |
 | **ask-user-question** | Structured question UI with multi-select and free-text |
-| **prompt-bar** | Custom prompt bar with context window and caveman indicator |
+| **prompt-bar** | Custom prompt bar with context window and extension indicators |
+| **codex-usage** | Shows remaining hourly and weekly Codex subscription usage |
 | **token-cost-tracker** | Logs token usage and cost per message to disk |
 
 ## Themes

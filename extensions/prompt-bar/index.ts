@@ -152,12 +152,18 @@ function getFooterRenderData(ctx: any, theme: Theme): { left: string; usageText:
 
   const modelName = context?.model?.name || context?.model?.id || "no model";
   const provider = context?.model?.provider ? `${context.model.provider}` : "offline";
-  const providerLabel = isSubscriptionProvider(context) ? `${provider} (sub)` : provider;
+  const extensionStatuses = footerDataRef?.getExtensionStatuses?.();
+  const codexUsage = context?.model?.provider === "openai-codex"
+    ? extensionStatuses?.get("codex-usage")
+    : undefined;
+  const providerLabel = isSubscriptionProvider(context)
+    ? theme.fg("muted", ` ${provider} (sub${codexUsage ? " " : ""}`) +
+      (codexUsage ?? "") + theme.fg("muted", ")")
+    : theme.fg("muted", ` ${provider}`);
   const thinking = getThinkingLevel();
   const branch = footerDataRef?.getGitBranch?.() || "no-git";
   const worktreeSuffix = branch === "no-git" ? "" : ` (${gitWorktreeLabel ?? "primary"})`;
   const usage = context?.getContextUsage?.();
-  const extensionStatuses = footerDataRef?.getExtensionStatuses?.();
   const cavemanIndicator = extensionStatuses?.get("caveman");
   const ponytailIndicator = extensionStatuses?.get("ponytail")?.replace("ponytail: ", "");
 
@@ -173,7 +179,7 @@ function getFooterRenderData(ctx: any, theme: Theme): { left: string; usageText:
     }
   }
 
-  const modelProvider = theme.fg("text", modelName) + theme.fg("muted", ` ${providerLabel}`);
+  const modelProvider = theme.fg("text", modelName) + providerLabel;
   const left = [
     cavemanIndicator,
     ponytailIndicator,
