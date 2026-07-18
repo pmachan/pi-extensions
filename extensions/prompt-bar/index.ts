@@ -20,6 +20,7 @@ type PromptState = {
 
 type FooterDataLike = {
   getGitBranch?: () => string | null;
+  getExtensionStatuses?: () => ReadonlyMap<string, string>;
   onBranchChange?: (listener: () => void) => (() => void) | void;
 };
 
@@ -158,6 +159,7 @@ function getFooterRenderData(ctx: any, theme: Theme): { left: string; usageText:
   const worktreeSuffix = branch === "no-git" ? "" : ` (${gitWorktreeLabel ?? "primary"})`;
   const usage = context?.getContextUsage?.();
   const cavemanIndicator = renderCavemanIndicator(context ?? activeCtx, theme);
+  const ponytailIndicator = extensionStatuses?.get("ponytail")?.replace("ponytail: ", "");
 
   let tokensIn = 0;
   let tokensOut = 0;
@@ -174,6 +176,7 @@ function getFooterRenderData(ctx: any, theme: Theme): { left: string; usageText:
   const modelProvider = theme.fg("text", modelName) + theme.fg("muted", ` ${providerLabel}`);
   const left = [
     cavemanIndicator,
+    ponytailIndicator,
     modelProvider,
     renderThinkingLevel(theme, thinking),
     theme.fg("muted", ` ${branch}${worktreeSuffix}`),
