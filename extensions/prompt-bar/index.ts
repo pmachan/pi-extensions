@@ -11,7 +11,6 @@ import {
   type OverlayHandle,
   type TUI,
 } from "@earendil-works/pi-tui";
-import { renderCavemanIndicator } from "./caveman";
 
 type PromptState = {
   text: string;
@@ -158,7 +157,8 @@ function getFooterRenderData(ctx: any, theme: Theme): { left: string; usageText:
   const branch = footerDataRef?.getGitBranch?.() || "no-git";
   const worktreeSuffix = branch === "no-git" ? "" : ` (${gitWorktreeLabel ?? "primary"})`;
   const usage = context?.getContextUsage?.();
-  const cavemanIndicator = renderCavemanIndicator(context ?? activeCtx, theme);
+  const extensionStatuses = footerDataRef?.getExtensionStatuses?.();
+  const cavemanIndicator = extensionStatuses?.get("caveman");
   const ponytailIndicator = extensionStatuses?.get("ponytail")?.replace("ponytail: ", "");
 
   let tokensIn = 0;

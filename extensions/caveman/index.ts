@@ -69,36 +69,7 @@ async function saveConfig(config: CavemanConfig): Promise<void> {
 	return saveConfigQueue;
 }
 
-interface Animation {
-	frames: string[];
-	label: string;
-	interval: number;
-}
-
-const R = "\x1b[38;5;196m";
-const O = "\x1b[38;5;208m";
-const Y = "\x1b[38;5;220m";
-const W = "\x1b[38;5;230m";
-const E = "\x1b[38;5;52m";
-const X = "\x1b[0m";
-
-const FIRE_FRAMES = [
-	`${R}⠠${O}⠄${X}`,
-	`${O}⠔${Y}⠂${X}`,
-	`${Y}⠊${W}⠑${X}`,
-	`${W}⠑${Y}⠊${X}`,
-	`${Y}⠂${O}⠔${X}`,
-	`${O}⠄${R}⠠${X}`,
-	`${R}⠠${E}⠄${X}`,
-	`${E}⠔${R}⠂${X}`,
-];
-
-const ANIMATIONS: Record<Exclude<Level, "off">, Animation> = {
-	lite: { frames: FIRE_FRAMES, label: "LITE", interval: 300 },
-	full: { frames: FIRE_FRAMES, label: "FULL", interval: 200 },
-	ultra: { frames: FIRE_FRAMES, label: "ULTRA", interval: 100 },
-	micro: { frames: FIRE_FRAMES, label: "MICRO", interval: 120 },
-};
+const CAVEMAN_ICON = "🪨";
 
 const BASE = `IMPORTANT: You are in CAVEMAN MODE. Respond terse like smart caveman. All technical substance stay. Only fluff die.
 
@@ -139,9 +110,6 @@ const CAVEMAN_LEVEL_ENTRY = "caveman-level";
 export default function caveman(pi: ExtensionAPI) {
 	let level: Level = "off";
 	let config: CavemanConfig = { ...DEFAULT_CONFIG };
-	let timer: ReturnType<typeof setInterval> | null = null;
-	let frameIndex = 0;
-	let isActive = false;
 	let configLoadPromise: Promise<void> | null = null;
 
 	const ensureConfigLoaded = async () => {
@@ -156,40 +124,13 @@ export default function caveman(pi: ExtensionAPI) {
 		await configLoadPromise;
 	};
 
-	function stopAnimation() {
-		if (timer) {
-			clearInterval(timer);
-			timer = null;
-		}
-		frameIndex = 0;
-	}
-
 	function syncStatus(ctx: Pick<ExtensionContext, "ui">) {
-		stopAnimation();
-		const theme = ctx.ui.theme;
-
 		if (level === "off" || !config.showStatus) {
 			ctx.ui.setStatus("caveman", undefined);
 			return;
 		}
 
-		const anim = ANIMATIONS[level];
-		const setFrame = (frame: string) => {
-			ctx.ui.setStatus("caveman", frame + " " + theme.fg("muted", "caveman level: ") + theme.fg("text", anim.label));
-		};
-
-		if (!isActive) {
-			setFrame(anim.frames[0]!);
-			return;
-		}
-
-		const renderFrame = () => {
-			setFrame(anim.frames[frameIndex % anim.frames.length]!);
-			frameIndex++;
-		};
-
-		renderFrame();
-		timer = setInterval(renderFrame, anim.interval);
+		ctx.ui.setStatus("caveman", ctx.ui.theme.fg("warning", `${CAVEMAN_ICON} ${level.toUpperCase()}`));
 	}
 
 	pi.on("session_start", async (_event, ctx) => {
@@ -223,21 +164,6 @@ export default function caveman(pi: ExtensionAPI) {
 		syncStatus(ctx);
 	});
 
-	pi.on("agent_start", async (_event, ctx) => {
-		isActive = true;
-		syncStatus(ctx);
-	});
-
-	pi.on("agent_end", async (_event, ctx) => {
-		isActive = false;
-		syncStatus(ctx);
-	});
-
-	pi.on("session_shutdown", async () => {
-		stopAnimation();
-		isActive = false;
-	});
-
 	pi.registerCommand("caveman", {
 		description: "Toggle caveman mode, set level, use stop/off/quit to disable, or 'config' to open settings",
 		getArgumentCompletions: (prefix: string) => {
@@ -267,7 +193,7 @@ export default function caveman(pi: ExtensionAPI) {
 			pi.appendEntry(CAVEMAN_LEVEL_ENTRY, { level });
 			syncStatus(ctx);
 
-			ctx.ui.notify(level === "off" ? "Caveman mode off." : `Caveman: ${ANIMATIONS[level].label}`, "info");
+			ctx.ui.notify(level === "off" ? "Caveman mode off." : `Caveman: ${level.toUpperCase()}`, "info");
 		},
 	});
 
@@ -284,7 +210,7 @@ export default function caveman(pi: ExtensionAPI) {
 				},
 				{
 					id: "showStatus",
-					label: "Show animated status bar",
+					label: "Show status bar",
 					currentValue: config.showStatus ? "on" : "off",
 					values: ["on", "off"],
 				},
